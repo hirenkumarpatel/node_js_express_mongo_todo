@@ -4,6 +4,7 @@
  * npm install bodyparser to parse json data client and server side
  * npm i express to use express framework
  * npm install mongodb to connect to database
+ * while submitting rest (PUT) request via postman do not forget to set content-type header to application/json
  */
 
 //importing all modules
@@ -48,18 +49,19 @@ app.put("/:id", (req, res) => {
   //retriving id from url
   const todoID = req.params.id;
   const userInput = req.body;
-  console.log(userInput);
+  
+  //mongodb syntax to update document
   db.getDB()
     .collection(collectionName)
-    .findOneAndUpdate(
-      { _id: db.getPrimaryKey(todoID) },
-      { $set: {list: userInput.todo } },
-      { returnOriginal: false },
+    .updateOne(
+      { _id: db.getPrimaryKey(todoID) },//getPrimaryKey will covert to object because id can only be object only
+      { $set: userInput  },//setting json data(userInput) to document
+      
       (err, result) => {
         if (err) throw err;
         else {
-            res.json(result);
-            console.log(result);
+          res.json(result);
+           
         }
       }
     );
