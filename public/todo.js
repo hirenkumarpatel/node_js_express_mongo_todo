@@ -53,7 +53,7 @@ $(document).ready(() => {
     data.forEach(todo => { //seprate json object
       let ids = buildIDs(todo);
       todoList.append(buildTemplate(todo, ids));// sending single json object
-      // editTodo(todo,ids.todoID,ids.editID);
+      editTodo(todo,ids.todoID,ids.editID);
       deleteTodo(todo,ids.listItemID,ids.deleteID);
     });
   };
@@ -77,14 +77,38 @@ $(document).ready(() => {
         if (data.result.ok == 1 && data.result.n == 1) {
           let ids = buildIDs(data.document);
           todoList.append(buildTemplate(data.document, ids));
-          // editTodo(todo,ids.todoID,ids.editID);
+          editTodo(todo,ids.todoID,ids.editID);
           deleteTodo(data.document,ids.listItemID,ids.deleteID);
+          resetTodoInput();
         }
-        else{
-          console.log(`data bypasseed: ${data}`);
-        }
+        
       });
   });
+
+  //edit todo
+  const editTodo=(todo,todoID,editID)=>{
+    let editBtn=$(`#${editID}`);
+    editBtn.click(()=>{
+
+      fetch(`/${todo._id}`,
+      {
+        method:"PUT",
+        headers:{'Content-Type':'application/json;charset=utf-8'},
+        body:JSON.stringify({todo:todoInput.val()})
+      }).then((res)=>{
+        return res.json();
+      }).then((data)=>{
+        console.log(data);
+        if(data.ok==1){// if successful
+            let todoIndex=$(`#${todoID}`);//id of the list item to be changed - <li> id
+            todoIndex.html(todoInput.val());
+            
+            resetTodoInput();
+
+        }
+      });
+    });
+  }
 
   //Delete todo
   const deleteTodo=(todo,listItemID,deleteID)=>{
