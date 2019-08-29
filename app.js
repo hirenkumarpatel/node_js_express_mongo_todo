@@ -55,8 +55,8 @@ app.put("/:id", (req, res) => {
     .collection(collectionName)
     .updateOne(
       { _id: db.getPrimaryKey(todoID) },//getPrimaryKey will covert to object because id can only be object only
-      { $set: userInput  },//setting json data(userInput) to document
-      
+      { $set: userInput  },//setting json data(userInput) works only with api call
+                          //{$set:{'todo':userInput}} if data passing is not json data then need to set 
       (err, result) => {
         if (err) throw err;
         else {
@@ -67,6 +67,18 @@ app.put("/:id", (req, res) => {
     );
     
 });
+
+//inserting the new todo data via api
+app.post("/",(req,res)=>{
+  //retriving usr data
+  const userInput=req.body;
+  //connecting database and populating data
+  db.getDB().collection(collectionName).insertOne(userInput,(err,result)=>{
+    if(err) throw err;
+    else res.json({result:result,document:result.ops[0]});
+  }); 
+});
+
 
 //connect to database
 db.connect(err => {
