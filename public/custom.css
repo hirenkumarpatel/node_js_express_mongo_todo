@@ -1,0 +1,15 @@
+.app-box{
+     
+    padding:20px;
+    margin-top:20px;
+}
+#todo-input:focus{
+    border:2px solid rgb(0, 128, 0);
+}
+#todo-submit{
+    background:rgb(8, 145, 8);
+    color:#ffffff;
+}
+#todo-submit:hover, #todo-submit:click{
+    background: rgb(0, 128, 0);
+}

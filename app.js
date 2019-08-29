@@ -28,6 +28,8 @@ const filePath = path.join(__dirname, "/index.html");
 app.get("/", (req, res) => {
   res.sendFile(filePath);
 });
+//create path to js file
+app.use(express.static(path.join(__dirname, "public")));
 
 //get todo list in server
 app.get("/todos", (req, res) => {
