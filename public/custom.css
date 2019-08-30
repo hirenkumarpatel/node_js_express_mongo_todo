@@ -1,7 +1,11 @@
 .app-box{
      
     padding:20px;
-    margin-top:20px;
+    max-width:800px;/* tablet size*/
+    margin:20px auto ;
+    border:1px solid #c4c4c4c0;
+    border-radius: 5px;
+    box-shadow: 2px 2px 20px 2px #c4c4c4cc;
 }
 #todo-input:focus{
     border:2px solid rgb(0, 128, 0);

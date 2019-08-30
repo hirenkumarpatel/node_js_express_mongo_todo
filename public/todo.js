@@ -2,6 +2,28 @@ $(document).ready(() => {
   const todoList = $("#todo-list");
   const todoForm = $("#todo-form");
   const todoInput = $("#todo-input");
+  const todoAlert=$("#todo-alert");
+  const todoMessage=$("#todo-message");
+  todoAlert.hide();
+  todoMessage.hide();
+
+  //displaying alert on data insert
+  const displayMessage=(status,msg)=>{
+    if(status){
+      todoAlert.removeClass('alert-danger');
+      todoAlert.addClass('alert-success');
+      todoMessage.html(msg);
+      todoAlert.show();
+      todoMessage.show();
+    }
+    else{
+      todoAlert.removeClass('alert-success');
+      todoAlert.addClass('alert-danger');
+      todoMessage.html(msg);
+      todoAlert.show();
+      todoMessage.show();
+    }
+  }
 
   //get todo list
   const getTodos = () => {
@@ -74,13 +96,20 @@ $(document).ready(() => {
       })
       .then(data => {
         
-        if (data.result.ok == 1 && data.result.n == 1) {
-          let ids = buildIDs(data.document);
-          todoList.append(buildTemplate(data.document, ids));
-          editTodo(todo,ids.todoID,ids.editID);
-          deleteTodo(data.document,ids.listItemID,ids.deleteID);
-          resetTodoInput();
+        if(!data.error){
+          if (data.result.ok == 1 && data.result.n == 1) {
+            let ids = buildIDs(data.document);
+            todoList.append(buildTemplate(data.document, ids));
+            editTodo(data.document,ids.todoID,ids.editID);
+            deleteTodo(data.document,ids.listItemID,ids.deleteID);
+            displayMessage(true,data.msg);
+            resetTodoInput();
+          }
         }
+        else{
+          displayMessage(false,data.error.message);
+        }
+        
         
       });
   });

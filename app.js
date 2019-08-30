@@ -12,6 +12,7 @@ const express = require("express");
 const bodyparser = require("body-parser");
 const path = require("path");
 const db = require("./dbconfig");
+const joi = require("joi"); // for data validation explicit installation
 
 //initialize express
 const app = express();
@@ -23,6 +24,11 @@ const collectionName = "todo";
 const port = process.env.PORT || 3000;
 //creating the filepath to home page
 const filePath = path.join(__dirname, "/index.html");
+
+//to create validtaion rules (only string and required)
+const schema = joi.object().keys({
+  todo: joi.string().required()
+});
 
 //creating the routes
 app.get("/", (req, res) => {
@@ -68,17 +74,30 @@ app.put("/:id", (req, res) => {
     );
 });
 
-//inserting the new todo data via api
-app.post("/", (req, res) => {
+//inserting the new todo data via api (next is middleware function)
+app.post("/", (req, res, next) => {
   //retriving usr data
   const userInput = req.body;
-  //connecting database and populating data
-  db.getDB()
-    .collection(collectionName)
-    .insertOne(userInput, (err, result) => {
-      if (err) throw err;
-      else res.json({ result: result, document: result.ops[0] });
-    });
+  //validating todo insert
+  joi.validate(userInput, schema, (err, result) => {
+    if (err) {
+      const error = new Error("Inserted data is not valid!!");
+      error.status = 400;
+      next(error);
+    } else {
+      //connecting database and populating data
+      db.getDB()
+        .collection(collectionName)
+        .insertOne(userInput, (err, result) => {
+          if (err) {
+            const error=new Error("Failed to insert Todo!");
+            error.status=400;
+            next(error);
+          }
+          else res.json({ result: result, document: result.ops[0],msg:"Successfully inserted Todo",error:null });
+        });
+    }
+  });
 });
 
 //delete todo list via api
@@ -91,6 +110,16 @@ app.delete("/:id", (req, res) => {
       if (err) throw err;
       else res.json(result);
     });
+});
+
+//middleware funtion to handle custom error handling
+app.use((err,req,res,next)=>{
+  res.status(err.status).json({
+    error:{
+      message:err.message
+    }
+  });
+
 });
 
 //connect to database
