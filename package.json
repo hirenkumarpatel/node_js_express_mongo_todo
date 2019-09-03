@@ -4,7 +4,7 @@
   "description": "Simple To Do App",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon ./app.js"
   },
   "keywords": [
     "todo",
@@ -19,6 +19,7 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "nodemon": "^1.19.1"
   }
 }

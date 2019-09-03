@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>TaskMapper</title>
+    <link rel="stylesheet" href="custom.css" />
+    <link
+      href="https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main>
+      <section id="header">
+        <h2 id="app-title" class="title-color">Task Mapper</h2>
+        <button class="button-link title-color" id="new-task-top-button">
+          <i class="icon ion-md-add-circle-outline title-color"></i>New Task
+        </button>
+      </section>
+      
+      <div class="container">
+        <section id="new-task-section">
+          <label class="default input-label">Enter task description</label>
+          <form id="task-form"></form>
+          <div class="new-task-box">
+              
+            <input type="text" name="new-task" class="default" id="task-input-box" />
+            <input
+              type="submit"
+              id="new-task-button"
+              class="title-color"
+              value="Add Task"
+            />
+        
+          </div>
+        </form>
+        </section>
+        <section>
+            <div class="alert" id="task-alert-box" >
+                <span id="alert-message"><i class="ion-md-checkmark-circle" id="alert-icon"></i>some alert text</span>
+                <button class="button-link" id="alert-close-button ">
+                    <i class="ion-md-close"></i>
+                </button>
+            </div>
+        </section>
+        <section>
+          <ul id="task-list">
+            
+          </ul>
+        </section>
+        <footer>Hiren Patel copyright &copy: 2019</footer>
+       
+      </div>
+    </main>
+
+ <script src="taskmapper.js"></script>
+  </body>
+
+</html>

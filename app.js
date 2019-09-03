@@ -8,6 +8,10 @@
  */
 
 //importing all modules
+
+
+
+
 const express = require("express");
 const bodyparser = require("body-parser");
 const path = require("path");
@@ -23,7 +27,7 @@ const collectionName = "todo";
 //initialize port with dynamic port or fixed 3000
 const port = process.env.PORT || 3000;
 //creating the filepath to home page
-const filePath = path.join(__dirname, "/index.html");
+const filePath = path.join(__dirname, "/app.html");
 
 //to create validtaion rules (only string and required)
 const schema = joi.object().keys({
@@ -32,13 +36,14 @@ const schema = joi.object().keys({
 
 //creating the routes
 app.get("/", (req, res) => {
+  console.log("home url called..");
   res.sendFile(filePath);
 });
-//create path to js file
+//create static path to public files (css,js) file
 app.use(express.static(path.join(__dirname, "public")));
 
 //get todo list in server
-app.get("/todos", (req, res) => {
+app.get("/tasks", (req, res) => {
   //calling getDb method from dbConfig and using mongo's .find({}) method to retrive data in array
   db.getDB()
     .collection(collectionName)
@@ -46,7 +51,7 @@ app.get("/todos", (req, res) => {
     .toArray((err, document) => {
       if (err) throw err;
       else {
-        console.log(document);
+        console.log(`data found in /todos :${JSON.stringify(document)}`);
         res.json(document);
       }
     });
@@ -129,3 +134,4 @@ db.connect(err => {
     app.listen(port, () => console.log(`server is running at port: ${port}`));
   }
 });
+
