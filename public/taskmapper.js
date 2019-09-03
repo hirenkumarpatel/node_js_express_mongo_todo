@@ -3,6 +3,7 @@ window.onload = () => {
   const taskList = document.querySelector("#task-list");
   const taskForm = document.querySelector("#task-form");
   const taskInputBox = document.querySelector("#task-input-box");
+  const taskInputButton = document.querySelector("#task-input-button");
   const taskAlert = document.querySelector("#task-alert-box");
   const taskMessage = document.querySelector("#alert-message");
   const alertIcon = document.querySelector("#alert-icon");
@@ -20,7 +21,7 @@ window.onload = () => {
         return res.json();
       })
       .then(data => {
-        console.log(JSON.stringify(data));
+        // console.log(JSON.stringify(data));
         displayTasks(data);
       });
   };
@@ -30,15 +31,20 @@ window.onload = () => {
 
   //generic method to create and display tasks list
   let displayTasks = tasksArray => {
-    tasksArray.forEach(task => {
-      //retrived task Object
-      console.log(JSON.stringify(task));
+    
+    if (tasksArray.length > 1) {
+      tasksArray.forEach(task => {
+        //calling generateElementIDs with task_id object value
+        let IDList = generateElementIDs(task._id);
+        //calling createTaskTemplate with IDlist Array and Task's todo value
+        createTaskTemplate(IDList, task.todo);
+      });
+    } else {
       //calling generateElementIDs with task_id object value
-      let IDList = generateElementIDs(task._id);
-      console.log(IDList);
+      let IDList = generateElementIDs(tasksArray._id);
       //calling createTaskTemplate with IDlist Array and Task's todo value
-      createTaskTemplate(IDList, task.todo);
-    });
+      createTaskTemplate(IDList, tasksArray.todo);
+    }
   };
 
   //generated ids for li element,edit and delete button to process further click events
@@ -78,23 +84,32 @@ window.onload = () => {
     taskList.appendChild(li);
   };
 
-  //create the new task
-  //taskForm.submit((event)=>{
+  //***************************************** */ temporary data
+  taskInputButton.addEventListener("click", () => {
+    fetch("/", {
+      method: "POST",
+      body: JSON.stringify({ todo: taskInputBox.value }),
+      headers: { "Content-Type": "application/json;charset = utf-8" }
+    })
+      .then(res => {
+        return res.json();
+      })
+      .then(data => {
+        if (!data.error) {
+          if (data.result.ok === 1 && data.result.n === 1) {
+            //create new task element by passing document json object from returned respose
+            displayTasks(data.document);
+            //clear input field
+            clearForm();
+          }
+        } //main if ends
+        console.log(`${JSON.stringify(data)}`);
+      });
+  });
 
-    //preventing default form submission behaviour
-    // event.preventDefault();
-    // console.log("data submitted");
-    // //fetching url with header information
-    // fetch('/',{
-    //   method: "post",
-    //   body: JSON.stringify({ todo: taskInputBox.val(),date:new Date() }),
-    //   headers: { "Content-Type": "application/json;charset = utf-8" }
-    // }).then(res=>{
-    //   return res.json();
-    // }).then(data=>{
-    //   console.log(`respons after insertion:${JSON.stringify(data)}`);
-    // });
-  //});
-  
+  //clear input field
+  let clearForm = () => {
+    taskInputBox.value = "";
+  };
   //end of windos onload function
 };

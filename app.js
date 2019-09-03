@@ -8,10 +8,6 @@
  */
 
 //importing all modules
-
-
-
-
 const express = require("express");
 const bodyparser = require("body-parser");
 const path = require("path");
@@ -36,9 +32,9 @@ const schema = joi.object().keys({
 
 //creating the routes
 app.get("/", (req, res) => {
-  console.log("home url called..");
   res.sendFile(filePath);
 });
+
 //create static path to public files (css,js) file
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -51,7 +47,7 @@ app.get("/tasks", (req, res) => {
     .toArray((err, document) => {
       if (err) throw err;
       else {
-        console.log(`data found in /todos :${JSON.stringify(document)}`);
+        console.log(`${JSON.stringify(document)}`);
         res.json(document);
       }
     });
@@ -82,7 +78,8 @@ app.put("/:id", (req, res) => {
 //inserting the new todo data via api (next is middleware function)
 app.post("/", (req, res, next) => {
   //retriving usr data
-  const userInput = req.body;
+  const userInput =req.body;
+  
   //validating todo insert
   joi.validate(userInput, schema, (err, result) => {
     if (err) {
@@ -90,19 +87,22 @@ app.post("/", (req, res, next) => {
       error.status = 400;
       next(error);
     } else {
+  
       //connecting database and populating data
       db.getDB()
         .collection(collectionName)
         .insertOne(userInput, (err, result) => {
           if (err) {
-            const error=new Error("Failed to insert Todo!");
+            const error=new Error("Failed to insert new task!");
             error.status=400;
             next(error);
           }
-          else res.json({ result: result, document: result.ops[0],msg:"Successfully inserted Todo",error:null });
+          else 
+          res.json({ result: result, document: result.ops[0],msg:"Successfully inserted Todo",error:null });
+          //res.json({ result: result,msg:"Successfully inserted Todo",error:err });
         });
     }
-  });
+  });//joi function ends here
 });
 
 //delete todo list via api
