@@ -54,32 +54,48 @@ app.get("/tasks", (req, res) => {
 });
 
 //update todo list by object id
-app.put("/:id", (req, res) => {
+app.put("/:id", (req, res, next) => {
   //retriving id from url
-  const todoID = req.params.id;
+  const taskId = req.params.id;
   const userInput = req.body;
-
-  //mongodb syntax to update document
-  db.getDB()
-    .collection(collectionName)
-    .updateOne(
-      { _id: db.getPrimaryKey(todoID) }, //getPrimaryKey will covert to object because id can only be object only
-      { $set: userInput }, //setting json data(userInput) works only with api call
-      //{$set:{'todo':userInput}} if data passing is not json data then need to set
-      (err, result) => {
-        if (err) throw err;
-        else {
-          res.json(result);
-        }
-      }
-    );
+  //validating task update
+  joi.validate(userInput, schema, (err, result) => {
+    if (err) {
+      console.log(`joi validation failed ${err}`);
+      const error = new Error("Data to be updated is not valid!!");
+      error.status = 400;
+      next(error);
+    } else {
+      //mongodb syntax to update document
+      db.getDB()
+        .collection(collectionName)
+        .updateOne(
+          { _id: db.getPrimaryKey(taskId) }, //getPrimaryKey will covert to object because id can only be object only
+          { $set: userInput }, //setting json data(userInput) works only with api call
+          //{$set:{'todo':userInput}} if data passing is not json data then need to set
+          (err, result) => {
+            if (err) {
+              const error = new Error("Update Failed");
+              error.status(400);
+              next(error);
+            } else {
+              res.json({
+                result: result,
+                message: "Task has been updated!!",
+                error: null
+              });
+            }
+          }
+        );
+    }
+  }); //joi validation ends
 });
 
 //inserting the new todo data via api (next is middleware function)
 app.post("/", (req, res, next) => {
   //retriving usr data
-  const userInput =req.body;
-  
+  const userInput = req.body;
+
   //validating todo insert
   joi.validate(userInput, schema, (err, result) => {
     if (err) {
@@ -87,44 +103,54 @@ app.post("/", (req, res, next) => {
       error.status = 400;
       next(error);
     } else {
-  
       //connecting database and populating data
       db.getDB()
         .collection(collectionName)
         .insertOne(userInput, (err, result) => {
           if (err) {
-            const error=new Error("Failed to insert new task!");
-            error.status=400;
+            const error = new Error("Failed to insert new task!");
+            error.status = 400;
             next(error);
-          }
-          else 
-          res.json({ result: result, document: result.ops[0],msg:"Successfully inserted Todo",error:null });
-          //res.json({ result: result,msg:"Successfully inserted Todo",error:err });
+          } else
+            res.json({
+              result: result,
+              document: result.ops[0],
+              message: "New task inserted successfully!!",
+              error: null
+            });
         });
     }
-  });//joi function ends here
+  }); //joi function ends here
 });
 
 //delete todo list via api
-app.delete("/:id", (req, res) => {
+app.delete("/:id", (req, res, next) => {
   //fetchig id from url
-  const todoID = req.params.id;
+  const taskId = req.params.id;
   db.getDB()
     .collection(collectionName)
-    .deleteOne({ _id: db.getPrimaryKey(todoID) }, (err, result) => {
-      if (err) throw err;
-      else res.json(result);
+    .deleteOne({ _id: db.getPrimaryKey(taskId) }, (err, result) => {
+      if (err) {
+        const error = new Error("Task deletion failed!!");
+        error.status(400);
+        next(error);
+      } else
+        res.json({
+          result: result,
+          message: "Task deleted successfully!!",
+          error: null
+        });
     });
 });
 
 //middleware funtion to handle custom error handling
-app.use((err,req,res,next)=>{
+app.use((err, req, res, next) => {
+  console.log(JSON.stringify(err));
   res.status(err.status).json({
-    error:{
-      message:err.message
+    error: {
+      message: err.message
     }
   });
-
 });
 
 //connect to database
@@ -134,4 +160,3 @@ db.connect(err => {
     app.listen(port, () => console.log(`server is running at port: ${port}`));
   }
 });
-

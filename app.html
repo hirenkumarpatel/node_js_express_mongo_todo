@@ -14,10 +14,10 @@
   <body>
     <main>
       <section id="header">
-        <h2 id="app-title" class="title-color">Task Mapper</h2>
-        <button class="button-link title-color" id="new-task-top-button">
+        <h2 id="app-title" class="title-color"> <i class="icon ion-md-albums title-color"></i>Task Mapper</h2>
+        <!-- <button class="button-link title-color" id="new-task-top-button">
           <i class="icon ion-md-add-circle-outline title-color"></i>New Task
-        </button>
+        </button> -->
       </section>
       
       <div class="container">
@@ -39,10 +39,7 @@
         </section>
         <section>
             <div class="alert" id="task-alert-box" >
-                <span id="alert-message"><i class="ion-md-checkmark-circle" id="alert-icon"></i>some alert text</span>
-                <button class="button-link" id="alert-close-button ">
-                    <i class="ion-md-close"></i>
-                </button>
+               <!-- some dynamic information is coming through Javascript-->
             </div>
         </section>
         <section>
@@ -54,7 +51,10 @@
        
       </div>
     </main>
-
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+    crossorigin="anonymous"></script>
  <script src="taskmapper.js"></script>
   </body>
 
