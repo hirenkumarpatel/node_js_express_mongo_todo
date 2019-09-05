@@ -151,9 +151,7 @@ input[type="submit"] {
 .button-link:hover {
   font-weight: 600;
 }
-.btn-save {
-  display: none;
-}
+
 footer {
   text-align: center;
 }
