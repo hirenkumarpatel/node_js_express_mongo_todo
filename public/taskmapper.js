@@ -29,7 +29,7 @@ $(() => {
 
   //generic method to create and display tasks list
   let displayTasks = tasksArray => {
-    let IDList, data, inputId;
+    let IDList, data;
     if (tasksArray.length > 1) {
       tasksArray.forEach(task => {
         data = task.todo;
@@ -37,26 +37,24 @@ $(() => {
         IDList = generateElementIDs(task._id);
         //calling createTaskTemplate with IDlist Array and Task's todo value
         createTaskTemplate(IDList, task.todo);
-        // changing UI of task list to task text to be changed on the spot
-        editTask(IDList, data);
-        //console.log("input:"+inputId);
-        // if(inputId){
-        //   //IDList.push(inputId);
-        //   alert(inputId);
-        saveTask(IDList.taskId, IDList.saveId);
-        // }
-
+        // changing UI of task list to task text to be updated later
+        createEditTaskTemplate(IDList.taskId, IDList.uiId, data);
+        //save edited task on the textbox besides
+        editTask(IDList.taskId, IDList.editId);
+        //delete task
         deleteTask(IDList.taskId, IDList.deleteId);
       });
     } else {
-      data = taskArray.todo;
+      data = tasksArray.todo;
       //calling generateElementIDs with task_id object value
       IDList = generateElementIDs(tasksArray._id);
       //calling createTaskTemplate with IDlist Array and Task's todo value
       createTaskTemplate(IDList, tasksArray.todo);
-      //changeUI
-      editTask(IDList, data);
-      saveTask(IDList.taskId, IDList.saveId);
+      // changing UI of task list to task text to be updated later
+      createEditTaskTemplate(IDList.taskId, IDList.uiId, data);
+      //save edited task on the textbox besides
+      editTask(IDList.taskId, IDList.editId);
+      //Delete Task
       deleteTask(IDList.taskId, IDList.deleteId);
     }
   };
@@ -65,7 +63,7 @@ $(() => {
   let generateElementIDs = id => {
     return {
       taskId: id,
-      saveId: "save-" + id,
+      uiId: "ui-" + id,
       deleteId: "delete-" + id,
       editId: "edit-" + id
     };
@@ -85,14 +83,14 @@ $(() => {
               <span>${data}</span>
             </p>
             <div class="action-links">
-              <button class="button-link"  id="${IDList.editId}">
+              <button class="button-link btn-ui"  id="${IDList.uiId}">
                 <i class="ion-md-create primary"></i>
               </button>
-              <button class="button-link btn-save" id="${IDList.saveId}">
+              <button class="button-link btn-edit" id="${IDList.editId}">
                 <i class="ion-md-done-all success"></i>
               </button>
-              <button class="button-link">
-                <i class="ion-md-remove-circle-outline danger" id="${IDList.deleteId}"></i>
+              <button class="button-link" id="${IDList.deleteId}">
+                <i class="ion-md-remove-circle-outline danger" ></i>
               </button>
             </div>`);
 
@@ -100,7 +98,7 @@ $(() => {
     taskList.append(li);
   };
 
-  //create template that update value in tasklist
+  //create template that update value in tasklist after successful update process
   let updateTaskTemplate = (taskId, data) => {
     let newTaskItem = $(`#${taskId}>p span`);
     newTaskItem.html(data);
@@ -130,12 +128,12 @@ $(() => {
             //create new task element by passing document json object from returned respose
             displayTasks(data.document);
             //shown operation status
-            showStatus(true, data.message);
+            showStatus("success", data.message);
             //clear input field
             clearForm();
           }
         } else {
-          showStatus(false, data.error.message);
+          showStatus("error", data.error.message);
           clearForm();
         }
         console.log(`${JSON.stringify(data)}`);
@@ -143,19 +141,21 @@ $(() => {
   }); // end of insert task method
 
   //change task UI from list to textbox to be change on the spot
-  let editTask = (IDList, data) => {
-    $(document).on("click", `#${IDList.editId}`, () => {
+  let createEditTaskTemplate = (taskId, uiId, data) => {
+    $(document).on("click", `#${uiId}`, () => {
       //generating Id for new textbox
-      let inputId = "input-" + IDList.taskId;
+      let inputId = "input-" + taskId;
       //selecting tasklist<li> and sub class to set new textbox
-      let newTaskItem = $(`#${IDList.taskId}>p span`);
+      let newTaskItem = $(`#${taskId}>p span`);
       //appending new textbox to tasklist <li>
       newTaskItem.html(`<input type='text' value='${data}' id='${inputId}'/>`);
       //returning id of new input element
-      updatedTextId = {
-        taskId: IDList.taskId,
-        inputId: inputId
-      };
+      updatedTextId = inputId;
+      //disabling ui-edit button and enabling save-edit button
+      let inputButton = $(`#${uiId}`);
+      let editButton = $(`#edit-${taskId}`);
+      inputButton.hide();
+      editButton.show();
     });
   };
 
@@ -163,40 +163,53 @@ $(() => {
    * Save edited task Item value
    * @param taskId task object id
    * */
-  let saveTask = (taskId, saveId) => {
+  let editTask = (taskId, editId) => {
     //calling jquery delegate method to add event on dynamic elements
-    $(document).on("click", `#${saveId}`, () => {
+
+    $(document).on("click", `#${editId}`, () => {
       if (updatedTextId) {
-        let inputBox = $(`#${updatedTextId.inputId}`);
+        //get the value from edit textbox
+        let inputBox = $(`#${updatedTextId}`);
         let taskData = inputBox.val();
-        //javascript's fetch method use to load url and header info withour form
-        fetch(`/${taskId}`, {
-          method: "PUT",
-          body: JSON.stringify({ todo: taskData }),
-          headers: { "Content-Type": "application/json;charset=utf-8" }
-        })
-          .then(res => {
-            return res.json();
+        if (taskData.trim() == "") {
+          inputBox.val('');
+          showStatus("warnig", "Task list can not be empty!! ");
+        } else {
+          //javascript's fetch method use to load url and header info withour form
+          fetch(`/${taskId}`, {
+            method: "PUT",
+            body: JSON.stringify({ todo: taskData }),
+            headers: { "Content-Type": "application/json;charset=utf-8" }
           })
-          .then(data => {
-            if (!data.error) {
-              //update the task front end side on the fly
-              let newData = taskData;
-              updateTaskTemplate(taskId, newData);
-              //show message
-              showStatus(true, data.message);
-              //clear Form
-              clearForm();
-            } else {
-              showStatus(false, data.error.message);
-              clearForm();
-            }
-          });
+            .then(res => {
+              return res.json();
+            })
+            .then(data => {
+              if (!data.error) {
+                //update the task front end side on the fly
+                let newData = taskData;
+                updateTaskTemplate(taskId, newData);
+                //show message
+                showStatus("success", data.message);
+                //clear Form
+                clearForm();
+              } else {
+                showStatus("error", data.error.message);
+                clearForm();
+              }
+            });
+        }
+        //Enable new edit button and disable save button
+        let inputButton = $(`#${editId}`);
+        let editButton = $(`#ui-${taskId}`);
+        inputButton.hide();
+        editButton.show();
       } else {
-        console.log("my be update item not found!");
+        //throw Error if try to save before edit text
+        showStatus("warning", "No data found to be edited!!");
       }
     });
-  }; //save task ends
+  }; //save edited task ends
 
   /**
    * Delete task Item value
@@ -213,14 +226,13 @@ $(() => {
           return res.json();
         })
         .then(data => {
-          console.log(JSON.stringify(data));
           if (!data.error) {
             //delete the task front end side on the fly
             deleteTaskTemplate(taskId);
             //show message
-            showStatus(true, data.message);
+            showStatus("success", data.message);
           } else {
-            showStatus(false, data.error.message);
+            showStatus("error", data.error.message);
           }
         });
     });
@@ -235,17 +247,23 @@ $(() => {
    * show error message after all insert update delte operation or Error
    */
   let showStatus = (status, message) => {
-    if (status) {
+    if (status == "success") {
       //if opration successful
       taskAlert.attr("class", "alert alert-success").html(`
     <span><i class="ion-md-checkmark-circle"></i>${message}</span>
     <button class="button-link" id="alert-close-button"><i class="ion-md-close-circle light"></i>
     </button>`);
-    } else {
+    } else if (status == "error") {
       //if operation fails
       taskAlert.attr("class", "alert alert-danger").html(`
     <span><i class="ion-md-alert"></i>${message}</span>
     <button class="button-link" id="alert-close-button"><i class="ion-md-close-circle light"></i>
+    </button>`);
+    } else {
+      //if operation fails
+      taskAlert.attr("class", "alert alert-warning").html(`
+    <span><i class="ion-md-warning"></i>${message}</span>
+    <button class="button-link" id="alert-close-button"><i class="ion-md-close-circle default"></i>
     </button>`);
     }
     taskAlert.show(); //display:flex
@@ -259,5 +277,5 @@ $(() => {
   };
   removeAlert();
 
-  //end of windos onload function
+  //end of wdocument.ready()
 });
