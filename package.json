@@ -13,13 +13,13 @@
   "author": "Hiren Patel",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
+    "body-parser": "^1.20.1",
     "joi": "^14.3.1",
     "mongodb": "^3.3.2",
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "nodemon": "^1.19.1"
   }
 }
